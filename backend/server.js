@@ -17,18 +17,30 @@ dotenv.config();
 
 const app = express();
 
-// Enhanced CORS configuration for production
+// CORS configuration with proper headers
 const corsOptions = {
   origin: ['http://localhost:5173', 'https://ramsisrentacar.netlify.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
   credentials: true,
-  maxAge: 86400 // 24 hours
+  maxAge: 86400
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Serve static files with proper headers and CORS enabled
+app.use('/uploads', (req, res, next) => {
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
+    'Cache-Control': 'public, max-age=31536000',
+    'Cross-Origin-Resource-Policy': 'cross-origin'
+  });
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // Configure multer for image upload with enhanced security
 const storage = multer.diskStorage({
@@ -150,44 +162,11 @@ app.get('/api/vehicles/:id', async (req, res) => {
 
 app.post('/api/vehicles', async (req, res) => {
   try {
-    // Validate required fields
-    const requiredFields = ['name', 'price', 'image', 'specs'];
-    for (const field of requiredFields) {
-      if (!req.body[field]) {
-        return res.status(400).json({ 
-          message: `Missing required field: ${field}` 
-        });
-      }
-    }
-
-    // Create new vehicle with validated data
-    const vehicle = new Vehicle({
-      name: req.body.name,
-      price: req.body.price,
-      description: req.body.description || '',
-      image: req.body.image,
-      gallery: req.body.gallery || [],
-      features: (req.body.features || []).filter(f => f.trim() !== ''),
-      rating: req.body.rating || 5,
-      isPopular: req.body.isPopular || false,
-      specs: {
-        transmission: req.body.specs.transmission,
-        fuel: req.body.specs.fuel,
-        power: req.body.specs.power || 'N/A',
-        seats: req.body.specs.seats || 5,
-        consumption: req.body.specs.consumption || 'N/A',
-        luggage: req.body.specs.luggage || 'N/A'
-      }
-    });
-
+    const vehicle = new Vehicle(req.body);
     const newVehicle = await vehicle.save();
     res.status(201).json(newVehicle);
   } catch (error) {
-    console.error('Error creating vehicle:', error);
-    res.status(400).json({ 
-      message: 'Error creating vehicle', 
-      error: error.message 
-    });
+    res.status(400).json({ message: 'Error creating vehicle', error: error.message });
   }
 });
 
@@ -231,17 +210,7 @@ app.get('/api/reservations', async (req, res) => {
 
 app.post('/api/reservations', async (req, res) => {
   try {
-    const reservation = new Reservation({
-      vehicleId: req.body.vehicleId,
-      vehicleName: req.body.vehicleName,
-      startDate: new Date(req.body.startDate),
-      endDate: new Date(req.body.endDate),
-      licenseNumber: req.body.licenseNumber,
-      pickupLocation: req.body.pickupLocation,
-      dropoffLocation: req.body.dropoffLocation,
-      status: 'en attente'
-    });
-
+    const reservation = new Reservation(req.body);
     const newReservation = await reservation.save();
     res.status(201).json(newReservation);
   } catch (error) {
