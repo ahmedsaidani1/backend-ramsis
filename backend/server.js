@@ -150,11 +150,44 @@ app.get('/api/vehicles/:id', async (req, res) => {
 
 app.post('/api/vehicles', async (req, res) => {
   try {
-    const vehicle = new Vehicle(req.body);
+    // Validate required fields
+    const requiredFields = ['name', 'price', 'image', 'specs'];
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ 
+          message: `Missing required field: ${field}` 
+        });
+      }
+    }
+
+    // Create new vehicle with validated data
+    const vehicle = new Vehicle({
+      name: req.body.name,
+      price: req.body.price,
+      description: req.body.description || '',
+      image: req.body.image,
+      gallery: req.body.gallery || [],
+      features: (req.body.features || []).filter(f => f.trim() !== ''),
+      rating: req.body.rating || 5,
+      isPopular: req.body.isPopular || false,
+      specs: {
+        transmission: req.body.specs.transmission,
+        fuel: req.body.specs.fuel,
+        power: req.body.specs.power || 'N/A',
+        seats: req.body.specs.seats || 5,
+        consumption: req.body.specs.consumption || 'N/A',
+        luggage: req.body.specs.luggage || 'N/A'
+      }
+    });
+
     const newVehicle = await vehicle.save();
     res.status(201).json(newVehicle);
   } catch (error) {
-    res.status(400).json({ message: 'Error creating vehicle', error: error.message });
+    console.error('Error creating vehicle:', error);
+    res.status(400).json({ 
+      message: 'Error creating vehicle', 
+      error: error.message 
+    });
   }
 });
 
