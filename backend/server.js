@@ -19,10 +19,11 @@ const app = express();
 
 // Enhanced CORS configuration for production
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: ['http://localhost:5173', 'https://ramsisrentacar.netlify.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
-  credentials: true
+  credentials: true,
+  maxAge: 86400 // 24 hours
 };
 
 app.use(cors(corsOptions));
@@ -103,9 +104,10 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    const imageUrl = `/uploads/${req.file.filename}`;
     res.json({ imageUrl });
   } catch (error) {
+    console.error('Error uploading file:', error);
     res.status(500).json({ message: 'Error uploading file', error: error.message });
   }
 });
@@ -116,11 +118,10 @@ app.post('/api/upload-multiple', upload.array('images', 3), (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'No files uploaded' });
     }
-    const imageUrls = req.files.map(file => 
-      `${req.protocol}://${req.get('host')}/uploads/${file.filename}`
-    );
+    const imageUrls = req.files.map(file => `/uploads/${file.filename}`);
     res.json({ imageUrls });
   } catch (error) {
+    console.error('Error uploading files:', error);
     res.status(500).json({ message: 'Error uploading files', error: error.message });
   }
 });
