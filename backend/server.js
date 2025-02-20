@@ -29,6 +29,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
+
 
 // Serve static files with proper headers and CORS enabled
 app.use('/uploads', (req, res, next) => {
@@ -162,10 +164,12 @@ app.get('/api/vehicles/:id', async (req, res) => {
 
 app.post('/api/vehicles', async (req, res) => {
   try {
+    console.log('Received Data:', req.body); // Log request body for debugging
     const vehicle = new Vehicle(req.body);
     const newVehicle = await vehicle.save();
     res.status(201).json(newVehicle);
   } catch (error) {
+    console.error('Error Details:', error); // Log the actual error
     res.status(400).json({ message: 'Error creating vehicle', error: error.message });
   }
 });

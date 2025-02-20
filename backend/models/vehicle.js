@@ -42,7 +42,7 @@ const vehicleSchema = new mongoose.Schema({
     },
     power: {
       type: String,
-      required: true
+      required: false
     },
     seats: {
       type: Number,
@@ -54,7 +54,7 @@ const vehicleSchema = new mongoose.Schema({
     },
     luggage: {
       type: String,
-      required: true
+      required: false
     }
   }
 });
