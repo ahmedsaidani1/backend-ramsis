@@ -33,11 +33,11 @@ app.use(express.json());
 // Serve static files with proper headers and CORS enabled
 app.use('/uploads', (req, res, next) => {
   res.set({
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-    'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept',
-    'Cache-Control': 'public, max-age=31536000',
-    'Cross-Origin-Resource-Policy': 'cross-origin'
+    "Access-Control-Allow-Origin": req.headers.origin || "*",
+    "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+    "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept",
+    "Cache-Control": "public, max-age=31536000",
+    "Cross-Origin-Resource-Policy": "cross-origin",
   });
   next();
 }, express.static(path.join(__dirname, 'uploads')));
