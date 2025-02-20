@@ -38,7 +38,7 @@ const vehicleSchema = new mongoose.Schema({
     },
     fuel: {
       type: String,
-      required: true
+      required: false
     },
     power: {
       type: String,
