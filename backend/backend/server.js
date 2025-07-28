@@ -19,7 +19,7 @@ const app = express();
 
 // CORS configuration with proper headers
 const corsOptions = {
-  origin: ['http://localhost:5173', 'https://ramsisrentacar.netlify.app'],
+  origin: ['http://localhost:5173', 'https://ramsisrentacar.shop'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
